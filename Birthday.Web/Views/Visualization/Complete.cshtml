@@ -3,5 +3,18 @@
     Layout = "~/Views/Shared/_VisualizationLayout.cshtml";
     ViewBag.CurrentStep = VisualizationSteps.Complete;
 }
-
-<h2>Complete</h2>
+<div id="complete" class="x-form">
+    @using (Ajax.BeginForm("Complete", "Visualization", ajaxOptions: new AjaxOptions() { UpdateTargetId = "complete" }))
+    {
+        if (!ViewBag.IsPublished)
+        {
+        <div class="pnl-actions">
+            <input type="submit" value="Publish" class="x-button" />
+        </div>
+        }
+        else
+        {
+        <h2>Already published!</h2>
+        }
+    }
+</div>

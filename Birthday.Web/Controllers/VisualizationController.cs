@@ -31,7 +31,8 @@ namespace Birthday.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View();
+            ViewBag.ErrorMessage = "Invalid username/password!";
+            return View(model);
         }
 
         [AccessActionFilter]
@@ -114,7 +115,22 @@ namespace Birthday.Web.Controllers
         [AccessActionFilter]
         public ActionResult Complete()
         {
+            ViewBag.IsPublished = _BirthdayService.GetBirthday(BirthdayID).Published;
+
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult Complete(FormCollection form)
+        {
+            var birthday = _BirthdayService.Get(BirthdayID);
+
+            birthday.Published = true;
+
+            _BirthdayService.Update(birthday);
+            _BirthdayService.SaveChanges();
+
+            return StatusView("Published successfully!");
         }
 
         [AccessActionFilter]

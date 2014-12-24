@@ -151,7 +151,6 @@ namespace Birthday.Web.Controllers
             }
         }
 
-        [HttpGet]
         public ActionResult Navigation()
         {
             var rd = ControllerContext.ParentActionViewContext.RouteData;

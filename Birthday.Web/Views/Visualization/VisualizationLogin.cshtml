@@ -5,35 +5,21 @@
 }
 <div id="vis-login">
     <form class="x-form" method="post">
-        <table class="x-tbl-form">
-            <tr>
-                <td>
-                    @Html.LabelFor(x => x.Email)
-                </td>
-                <td>
-                    @Html.TextBoxFor(x => x.Email)
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    @Html.ValidationMessageFor(x => x.Email)
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    @Html.LabelFor(x => x.Password)
-                </td>
-                <td>
-                    @Html.TextBoxFor(x => x.Password)
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    @Html.ValidationMessageFor(x => x.Password)
-                </td>
-            </tr>
-        </table>
-        <input type="submit" class="x-button" value="@GeneralResource.Login" />
+        <ul class="x-tbl-form">
+            <li>
+                @Html.LabelFor(x => x.Email)
+                @Html.TextBoxFor(x => x.Email)
+                @Html.ValidationMessageFor(x => x.Email)
+            </li>
+            <li>
+                @Html.LabelFor(x => x.Password)
+                @Html.TextBoxFor(x => x.Password)
+                @Html.ValidationMessageFor(x => x.Password)
+            </li>
+        </ul>
+        <div class="pnl-actions">
+            <input type="submit" class="x-button" value="@GeneralResource.Login" />
+        </div>
     </form>
 </div>
 @section scripts

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,28 +11,28 @@ namespace Birthday.Tools
 {
     public static class ImageTool
     {
-        public static byte[] ResizeImageFile(byte[] imageFile, int targetWidth, int targetHeight)
-        {
-            using (var original = new ImageMagick.MagickImage(imageFile))
-            {
-                #region Calculating width and height
+        //public static byte[] ResizeImageFile(byte[] imageFile, int targetWidth, int targetHeight)
+        //{
+        //    using (var original = new ImageMagick.MagickImage(imageFile))
+        //    {
+        //        #region Calculating width and height
 
-                if (original.Height > original.Width)
-                {
-                    targetWidth = (int)Math.Ceiling(original.Width * ((float)targetHeight / (float)original.Height));
-                }
-                else
-                {
-                    targetHeight = (int)Math.Ceiling(original.Height * ((float)targetWidth / (float)original.Width));
-                }
+        //        if (original.Height > original.Width)
+        //        {
+        //            targetWidth = (int)Math.Ceiling(original.Width * ((float)targetHeight / (float)original.Height));
+        //        }
+        //        else
+        //        {
+        //            targetHeight = (int)Math.Ceiling(original.Height * ((float)targetWidth / (float)original.Width));
+        //        }
 
-                #endregion
+        //        #endregion
 
-                original.Resize(targetWidth, targetHeight);
+        //        original.Resize(targetWidth, targetHeight);
 
-                return original.ToByteArray();
-            }
-        }
+        //        return original.ToByteArray();
+        //    }
+        //}
 
         public static byte[] CropImageFile(byte[] imageFile, Rectangle cropArea)
         {
@@ -51,41 +52,59 @@ namespace Birthday.Tools
 
         public static byte[] AutoOrientImageFile(byte[] imageFile)
         {
-            using (var original = new ImageMagick.MagickImage(imageFile))
+            using (var stream = new MemoryStream(imageFile))
             {
-                //switch (original.Orientation)
-                //{
-                //    case ImageMagick.OrientationType.BottomLeft:
-                //        original.Flip();
-                //        break;
-                //    case ImageMagick.OrientationType.BottomRight:
-                //        original.Rotate(180);
-                //        break;
-                //    case ImageMagick.OrientationType.LeftBotom:
-                //        original.Rotate(270);
-                //        break;
-                //    case ImageMagick.OrientationType.LeftTop:
-                //        original.Rotate(90);
-                //        original.Flop();
-                //        break;
-                //    case ImageMagick.OrientationType.RightBottom:
-                //        original.Rotate(270);
-                //        original.Flop();
-                //        break;
-                //    case ImageMagick.OrientationType.RightTop:
-                //        original.Rotate(90);
-                //        break;
-                //    case ImageMagick.OrientationType.TopLeft:
-                //        break;
-                //    case ImageMagick.OrientationType.TopRight:
-                //        original.Flop();
-                //        break;
-                //    default:
-                //        break;
-                //}
-                original.AutoOrient();
+                var bmp = new Bitmap(stream);
 
-                return original.ToByteArray();
+                var orient = BitConverter.ToInt16(bmp.GetPropertyItem(274).Value, 0);
+
+                var flip = OrientationToFlipType(orient);
+
+                if ((RotateFlipType)orient != RotateFlipType.RotateNoneFlipNone) // don't flip of orientation is correct
+                {
+                    bmp.RotateFlip(flip);
+                    using (var outStream = new MemoryStream())
+                    {
+                        bmp.Save(outStream, ImageFormat.Jpeg);
+
+                        return outStream.ToArray();
+                    }
+                }
+            }
+
+            return imageFile;
+        }
+
+        private static RotateFlipType OrientationToFlipType(int orientation)
+        {
+            switch (orientation)
+            {
+                case 1:
+                    return RotateFlipType.RotateNoneFlipNone;
+                    break;
+                case 2:
+                    return RotateFlipType.RotateNoneFlipX;
+                    break;
+                case 3:
+                    return RotateFlipType.Rotate180FlipNone;
+                    break;
+                case 4:
+                    return RotateFlipType.Rotate180FlipX;
+                    break;
+                case 5:
+                    return RotateFlipType.Rotate90FlipX;
+                    break;
+                case 6:
+                    return RotateFlipType.Rotate90FlipNone;
+                    break;
+                case 7:
+                    return RotateFlipType.Rotate270FlipX;
+                    break;
+                case 8:
+                    return RotateFlipType.Rotate270FlipNone;
+                    break;
+                default:
+                    return RotateFlipType.RotateNoneFlipNone;
             }
         }
 
@@ -96,10 +115,13 @@ namespace Birthday.Tools
 
             public ImageInfo(byte[] data)
             {
-                var image = new ImageMagick.MagickImage(data);
+                using (var stream = new MemoryStream(data))
+                {
+                    var image = new Bitmap(stream);
 
-                Width = image.Width;
-                Height = image.Height;
+                    Width = image.Width;
+                    Height = image.Height;
+                }
             }
         }
     }

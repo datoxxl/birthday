@@ -196,9 +196,10 @@ namespace Birthday.Web.Controllers
                     }
                 }
             }
-            catch { }
-
-            return JsonError();
+            catch (Exception ex)
+            {
+                return JsonError(ex.Message);
+            }
         }
 
         public ImageResult GetBirthdayImage(int imageIndex)
